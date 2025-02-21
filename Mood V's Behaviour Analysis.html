@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mood, Behaviour & Sleep Analysis</title>
+  <style>
+      body { 
+          font-family: Arial, sans-serif; 
+          margin: 0; 
+          padding: 0; 
+          text-align: center;
+          background-color: #f5f5f5;
+      }
+      .container { 
+          max-width: 100%; 
+          padding: 10px; 
+      }
+      .chart-container { 
+          margin-top: 20px; 
+          height: 400px;
+          width: 90%;
+          max-width: 600px;
+          margin-left: auto;
+          margin-right: auto;
+      }
+      .child-name { 
+          font-size: 20px; 
+          margin-bottom: 10px; 
+      }
+      select { 
+          padding: 10px; 
+          font-size: 16px; 
+          margin-top: 15px;
+          margin-bottom: 20px;
+          width: 90%;
+          max-width: 300px;
+      }
+
+      /* Header */
+      .header {
+          background-color: black;
+          color: white;
+          text-align: center;
+          padding: 20px;
+          font-size: 24px;
+          border: 20px solid white;
+      }
+
+      /* Title */
+      .title {
+          margin-top: 20px;
+          font-size: 32px;
+          font-weight: bold;
+      }
+
+      /* Navigation Buttons */
+      .nav-buttons {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          margin-top: 20px;
+      }
+      .nav-button {
+          background-color: black;
+          color: white;
+          padding: 10px 20px;
+          font-size: 16px;
+          text-decoration: none;
+          border-radius: 10px; /* more rounded for a "rounded square" look */
+          border: none;
+          cursor: pointer;
+      }
+      .nav-button:hover {
+          background-color: #333;
+      }
+
+      @media (max-width: 768px) {
+          .nav-buttons {
+              flex-direction: column;
+              align-items: center;
+          }
+          .nav-button {
+              width: 80%;
+              text-align: center;
+              margin-bottom: 10px;
+          }
+          .chart-container {
+              width: 100%;
+              height: auto;
+          }
+      }
+
+      h1 {
+          text-align: center;
+          margin-bottom: 10px;
+      }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Header with Dynamic Company Name -->
+  <div class="header" id="companyHeader">My Tribe Homes</div>
+
+  <!-- Title -->
+  <h1 class="title">Mood, Behaviour & Sleep Analysis</h1>
+
+  <!-- Navigation Buttons -->
+  <div class="nav-buttons">
+      <button class="nav-button" onclick="window.location.href='Landing Page.html'">Home</button>
+      <button class="nav-button" onclick="window.location.href='index.html'">Track Mood and Behaviour</button>
+      <button class="nav-button" onclick="window.location.href='Best Days.html'">Best Days</button>
+      <button class="nav-button" onclick="window.location.href='Admin.html'">Admin</button>
+  </div>
+
+  <div>
+      <label for="childSelect" style="margin-top: 15px; display: block;">Select Child:</label>
+      <select id="childSelect" onchange="updateTrendChart()">
+          <option value="">Select a Child</option>
+      </select>
+      <p id="childNameDisplay" class="child-name"></p>
+      <div class="chart-container">
+          <canvas id="trendChart"></canvas>
+      </div>
+  </div>
+
+  <script>
+      function updateCompanyName() {
+          const savedCompanyName = localStorage.getItem("companyName");
+          if (savedCompanyName) {
+              document.getElementById("companyHeader").textContent = savedCompanyName;
+          }
+      }
+
+      // On DOM load, unify duplicates and fill the dropdown
+      document.addEventListener("DOMContentLoaded", function () {
+          unifyDuplicatesInLocalStorage();
+          updateCompanyName();
+          window.addEventListener("companyNameUpdated", updateCompanyName);
+          populateChildDropdown();
+      });
+
+      let childrenData = {};
+      let selectedChild = localStorage.getItem("selectedChild") || "";
+      let trendChart;
+
+      // 1) Merge duplicates in localStorage (ex: 'paul', ' Paul ', 'PAUL') into one
+      function unifyDuplicatesInLocalStorage() {
+          let raw = localStorage.getItem('childrenData');
+          if (!raw) return;  // nothing to unify
+          let oldData = JSON.parse(raw);
+
+          let mergedData = {};  // normalizedKey => { moods:[], originalName: 'FirstEncounteredName' }
+
+          // For each child key in oldData:
+          for (let childKey in oldData) {
+              let normalized = childKey.trim().toLowerCase();
+              if (!mergedData[normalized]) {
+                  mergedData[normalized] = {
+                      moods: [],
+                      originalName: childKey
+                  };
+              }
+              // Merge moods
+              let oldMoods = oldData[childKey].moods || [];
+              mergedData[normalized].moods = mergedData[normalized].moods.concat(oldMoods);
+          }
+
+          // Build final object keyed by originalName
+          let finalData = {};
+          for (let normKey in mergedData) {
+              let original = mergedData[normKey].originalName;
+              finalData[original] = {
+                  moods: mergedData[normKey].moods
+              };
+          }
+
+          console.log('Unified data =>', finalData);
+          localStorage.setItem('childrenData', JSON.stringify(finalData));
+      }
+
+      // 2) Populate dropdown with unified data
+      function populateChildDropdown() {
+          childrenData = JSON.parse(localStorage.getItem('childrenData')) || {};
+          let childSelect = document.getElementById("childSelect");
+          childSelect.innerHTML = '<option value="">Select a Child</option>';
+
+          if (Object.keys(childrenData).length === 0) {
+              console.warn("No children found in localStorage.");
+              return;
+          }
+
+          // Sort child keys or just list them
+          let childKeys = Object.keys(childrenData);
+
+          for (let child of childKeys) {
+              let option = document.createElement("option");
+              option.value = child;
+              option.textContent = child;
+              childSelect.appendChild(option);
+          }
+
+          // If previously selected child still exists, re-select
+          if (selectedChild && childrenData[selectedChild]) {
+              childSelect.value = selectedChild;
+              updateTrendChart();
+          }
+      }
+
+      // 3) Update chart for the selected child
+      function updateTrendChart() {
+          selectedChild = document.getElementById("childSelect").value;
+          localStorage.setItem("selectedChild", selectedChild);
+
+          childrenData = JSON.parse(localStorage.getItem("childrenData")) || {};
+
+          if (!selectedChild || !childrenData[selectedChild]?.moods?.length) {
+              document.getElementById("childNameDisplay").textContent = "No data available.";
+              if (trendChart) {
+                  trendChart.destroy();
+                  trendChart = null;
+              }
+              return;
+          }
+
+          document.getElementById("childNameDisplay").textContent = `Mood, Behaviour & Sleep Trend for ${selectedChild}`;
+
+          const ctx = document.getElementById("trendChart").getContext("2d");
+
+          if (trendChart) {
+              trendChart.destroy();
+          }
+
+          let moodEntries = childrenData[selectedChild].moods.map(entry => ({
+              date: entry.date || "N/A",
+              mood: entry.mood ?? 5,
+              behaviour: entry.behaviour ?? 5,
+              sleepQuality: entry.sleepQuality ?? 5
+          }));
+
+          trendChart = new Chart(ctx, {
+              type: "line",
+              data: {
+                  labels: moodEntries.map(entry => entry.date),
+                  datasets: [
+                      {
+                          label: "Mood",
+                          data: moodEntries.map(entry => entry.mood),
+                          borderColor: "blue",
+                          fill: false,
+                          tension: 0.3
+                      },
+                      {
+                          label: "Behaviour",
+                          data: moodEntries.map(entry => entry.behaviour),
+                          borderColor: "red",
+                          fill: false,
+                          tension: 0.3
+                      },
+                      {
+                          label: "Sleep Quality",
+                          data: moodEntries.map(entry => entry.sleepQuality),
+                          borderColor: "green",
+                          fill: false,
+                          tension: 0.3
+                      }
+                  ]
+              },
+              options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: {
+                      x: {
+                          title: { display: true, text: "Date" },
+                          ticks: { autoSkip: true, maxTicksLimit: 10 }
+                      },
+                      y: {
+                          min: 1, max: 10,
+                          title: { display: true, text: "Scale (1-10)" }
+                      }
+                  }
+              }
+          });
+      }
+  </script>
+</body>
+</html>

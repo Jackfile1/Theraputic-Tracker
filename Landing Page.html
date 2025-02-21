@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Tribe Homes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff; /* White background */
+            text-align: center;
+        }
+        .header {
+            background-color: #000; /* Black header */
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            position: relative;
+            width: 100%;
+            box-sizing: border-box;
+            border: 20px solid #fff; /* White border around header */
+        }
+        .content {
+            margin-top: 20px;
+            padding: 20px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #000;
+            color: white;
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 18px;
+            border-radius: 8px;
+            margin: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .button:hover {
+            background-color: #333;
+        }
+        .emoji-container {
+            font-size: 40px;
+            margin-top: 20px;
+        }
+    </style>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const companyName = localStorage.getItem("companyName") || "My Tribe Homes";
+            document.getElementById("header-title").textContent = companyName;
+        });
+    </script>
+</head>
+<body>
+    <div class="header" id="header-title">
+        My Tribe Homes
+    </div>
+    <div class="content">
+        <h1>Mood V's Behaviour</h1>
+        <h2>Creating a visual representation linking Mood & Behaviour.</h2>
+        <p>Tracking Moods and Behaviours regularly will help us to identify</p>
+        <p>patterns that are linked to our children, and enable us to</p>
+        <p>better support them</p>
+        <div class="emoji-container">
+            😢 😞 😐 🙂 😁
+        </div>
+        <a href="index.html" class="button">Track Mood and behaviour</a>
+        <a href="Mood V's Behaviour Analysis.html" class="button">Mood V's Behaviour Analysis</a>
+        <a href="Best Days.html" class="button">Best Days</a>
+        <a href="Admin.html" class="button">Admin</a>
+    </div>
+</body>
+</html>

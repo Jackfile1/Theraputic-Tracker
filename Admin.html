@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charSet="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Company Details</title>
+    <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        background-color: #f3f4f6;
+        font-family: Arial, sans-serif;
+        margin: 0;
+      }
+      .header {
+        width: 100%;
+        background-color: #007bff;
+        color: white;
+        text-align: center;
+        padding: 15px;
+        font-size: 1.5em;
+        font-weight: bold;
+      }
+      .container {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        margin-top: 20px;
+      }
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header" id="companyHeader">My Company</div>
+    <div class="button-container" style="margin-top: 10px; display: flex; gap: 10px; justify-content: center;">
+        <a href="Landing Page.html" class="button" style="background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Home</a>
+        <a href="index.html" class="button" style="background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Track Mood and Behaviour</a>
+        <a href="Mood V's Behaviour Analysis.html" class="button" style="background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Mood V's Behaviour Analysis</a>
+        <a href="Best Days.html" class="button" style="background-color: #007bff; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Best Days</a>
+    </div>
+
+    <div class="container">
+      <h2>Enter Company Details</h2>
+      <input type="text" id="companyName" placeholder="Company Name" />
+      <button onclick="saveCompanyName()">Save</button>
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const savedCompanyName = localStorage.getItem("companyName");
+        if (savedCompanyName) {
+          document.getElementById("companyName").value = savedCompanyName;
+          document.getElementById("companyHeader").textContent = savedCompanyName;
+        }
+      });
+      
+      function saveCompanyName() {
+        const companyName = document.getElementById("companyName").value;
+        localStorage.setItem("companyName", companyName);
+        document.getElementById("companyHeader").textContent = companyName;
+        window.dispatchEvent(new Event("companyNameUpdated"));
+      }
+    </script>
+  </body>
+</html>

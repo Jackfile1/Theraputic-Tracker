@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Best Days</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
+
+    .header {
+      background-color: black;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      font-size: 24px;
+      border: 5px solid white; /* same size white border all around */
+      box-sizing: border-box;  /* ensures border is counted in total size */
+    }
+
+    .container {
+      max-width: 800px;
+      margin: auto;
+      text-align: center;
+    }
+
+    .button-container {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .menu-button {
+      display: inline-block;
+      padding: 15px 20px;
+      background-color: black;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      border-radius: 15px; /* Rounded square buttons */
+      width: 180px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .menu-button:hover {
+      background-color: #333;
+    }
+
+    .chart-container {
+      margin-top: 20px;
+      width: 100%;
+      max-width: 700px;
+      margin: auto;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    /* 🔹 Larger Select Dropdown */
+    select {
+      padding: 15px;
+      font-size: 18px;
+      border: 2px solid black;
+      border-radius: 5px;
+      width: 300px;
+      margin-bottom: 15px;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+</head>
+<body>
+
+  <div class="header" id="companyHeader"></div>
+
+  <div class="container">
+    <h1>Day of Week Averages (Mood, Behaviour & Sleep)</h1>
+
+    <!-- 🔹 Navigation Buttons moved under title -->
+    <div class="button-container">
+      <a href="Landing Page.html" class="menu-button">Home</a>
+      <a href="Index.html" class="menu-button">Track Mood and Behaviour</a>
+      <a href="Mood V's Behaviour Analysis.html" class="menu-button">Mood V's Behaviour Analysis</a>
+      <a href="Admin.html" class="menu-button">Admin</a>
+    </div>
+
+    <select id="childSelect" onchange="updateBarChart()">
+      <option value="">-- Select Child --</option>
+    </select>
+
+    <div class="chart-container">
+      <canvas id="dayOfWeekChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const savedCompanyName = localStorage.getItem("companyName");
+      if (savedCompanyName) {
+        document.getElementById("companyHeader").textContent = savedCompanyName ;
+      }
+      window.addEventListener("companyNameUpdated", function () {
+        const updatedCompanyName = localStorage.getItem("companyName");
+        document.getElementById("companyHeader").textContent = updatedCompanyName ;
+      });
+      populateChildDropdown();
+    });
+
+    let childrenData = JSON.parse(localStorage.getItem("childrenData")) || {};
+    const childSelect = document.getElementById("childSelect");
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    let dayOfWeekChart;
+
+    function populateChildDropdown() {
+      // Clear existing options to avoid duplicates
+      childSelect.innerHTML = "<option value=''>-- Select Child --</option>";
+
+      const keys = Object.keys(childrenData);
+      if (!keys.length) return;
+
+      keys.forEach(childName => {
+        const option = document.createElement("option");
+        option.value = childName;
+        option.textContent = childName;
+        childSelect.appendChild(option);
+      });
+    }
+
+    function updateBarChart() {
+      const selectedChild = childSelect.value;
+      if (!selectedChild || !childrenData[selectedChild]) {
+        if (dayOfWeekChart) {
+          // Clear chart data if no child is selected
+          dayOfWeekChart.data.datasets.forEach(ds => ds.data = []);
+          dayOfWeekChart.update();
+        }
+        return;
+      }
+
+      const logs = childrenData[selectedChild].moods || [];
+      let moodSums = Array(7).fill(0), moodCounts = Array(7).fill(0);
+      let behaviourSums = Array(7).fill(0), behaviourCounts = Array(7).fill(0);
+      let sleepSums = Array(7).fill(0), sleepCounts = Array(7).fill(0);
+
+      logs.forEach(entry => {
+        let d = new Date(entry.date);
+        if (isNaN(d)) return;
+        let dayIndex = d.getDay();
+
+        if (entry.mood !== undefined) {
+          moodSums[dayIndex] += entry.mood;
+          moodCounts[dayIndex]++;
+        }
+        if (entry.behaviour !== undefined) {
+          behaviourSums[dayIndex] += entry.behaviour;
+          behaviourCounts[dayIndex]++;
+        }
+        if (entry.sleepQuality !== undefined) {
+          sleepSums[dayIndex] += entry.sleepQuality;
+          sleepCounts[dayIndex]++;
+        }
+      });
+
+      const moodAverages = moodCounts.map((count, i) => count ? moodSums[i] / count : 0);
+      const behaviourAverages = behaviourCounts.map((count, i) => count ? behaviourSums[i] / count : 0);
+      const sleepAverages = sleepCounts.map((count, i) => count ? sleepSums[i] / count : 0);
+
+      // If there's already a chart, destroy it before re-creating
+      if (dayOfWeekChart) {
+        dayOfWeekChart.destroy();
+      }
+
+      const ctx = document.getElementById("dayOfWeekChart").getContext("2d");
+      dayOfWeekChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: daysOfWeek,
+          datasets: [
+            {
+              label: "Mood",
+              data: moodAverages,
+              backgroundColor: "rgba(0,0,255,0.5)",
+              borderColor: "blue",
+              borderWidth: 1
+            },
+            {
+              label: "Behaviour",
+              data: behaviourAverages,
+              backgroundColor: "rgba(255,0,0,0.5)",
+              borderColor: "red",
+              borderWidth: 1
+            },
+            {
+              label: "Sleep",
+              data: sleepAverages,
+              backgroundColor: "rgba(0,255,0,0.5)",
+              borderColor: "green",
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            datalabels: {
+              anchor: 'end',
+              align: 'start',
+              formatter: function(value) {
+                return pickEmoji(value);
+              },
+              font: { size: 20 }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 10,
+              title: { display: true, text: "Score (1-10)" }
+            },
+            x: { title: { display: true, text: "Day of the Week" } }
+          }
+        },
+        plugins: [ChartDataLabels]
+      });
+    }
+
+    function pickEmoji(value) {
+      if (isNaN(value) || value <= 0) return "";
+      const score = Math.round(value);
+      return ["😞","😢","😟","😕","😐","🙂","😊","😃","😄","🤩"][score - 1] || "";
+    }
+
+    // Once DOM is loaded, run populateChildDropdown
+    window.onload = populateChildDropdown;
+  </script>
+</body>
+</html>

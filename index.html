@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Tribe Homes - Mood V's Behaviour</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      margin: 20px; 
+      text-align: center; 
+    }
+    .container { 
+      max-width: 100%; 
+      padding: 10px; 
+      margin: auto; 
+    }
+    .header { 
+      background-color: black; 
+      color: white; 
+      padding: 20px; 
+      font-size: 24px; 
+    }
+    /* Turn the links into black, white-text, rounded-corner buttons, aligned in a row */
+    .button-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: center; /* center them horizontally */
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap; /* allows wrapping on smaller screens */
+    }
+    .button {
+      background-color: black;
+      color: white;
+      text-decoration: none;
+      font-size: 16px;
+      border-radius: 10px; /* Rounded corners */
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .button:hover {
+      background-color: #333;
+    }
+
+    .input-group { 
+      margin-bottom: 10px; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      gap: 10px; 
+    }
+    .input-group label { 
+      font-weight: bold; 
+    }
+    .input-group input, 
+    .input-group select, 
+    .input-group button { 
+      width: 90%; 
+      max-width: 400px; 
+      padding: 12px; 
+      border: 2px solid black; 
+      border-radius: 5px; 
+    }
+    .log-mood-button {
+      background-color: green;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      max-width: 450px;
+      margin: 10px auto;
+      padding: 20px;
+      font-size: 20px;
+      font-weight: bold;
+      border-radius: 12px;
+      box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+      transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+    }
+    .log-mood-button:active {
+      transform: scale(0.95);
+      background-color: #2e7d32; /* slightly darker green when pressed */
+      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    .chart-container { 
+      margin-top: 20px; 
+      width: 100%; 
+      max-width: 600px; 
+      margin: auto; 
+    }
+    canvas { 
+      width: 100% !important; 
+      height: auto !important; 
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="header" id="companyHeader">My Tribe Homes</div>
+
+  <script>
+    // Dynamically update company name from localStorage if it exists
+    document.addEventListener("DOMContentLoaded", function () {
+      const savedCompanyName = localStorage.getItem("companyName");
+      if (savedCompanyName) {
+        document.getElementById("companyHeader").textContent = savedCompanyName;
+      }
+      window.addEventListener("companyNameUpdated", function () {
+        const updatedCompanyName = localStorage.getItem("companyName");
+        document.getElementById("companyHeader").textContent = updatedCompanyName;
+      });
+    });
+  </script>
+
+  <div class="container">
+    <h1>My Tribe Home - Mood V's Behaviour</h1>
+
+    <!-- Button container with row alignment -->
+    <div class="button-container">
+      <a href="Landing Page.html" class="button">Home</a>
+      <a href="Mood V's Behaviour Analysis.html" class="button">Mood V's Behaviour Analysis</a>
+      <a href="Best Days.html" class="button">Best Days</a>
+      <a href="Admin.html" class="button">Admin</a>
+    </div>
+
+    <div class="input-group">
+      <input type="text" id="childName" placeholder="Enter child's name">
+      <button onclick="addChild()" style="border: 2px solid black;">Add Child</button>
+    </div>
+
+    <div class="input-group">
+      <label for="childSelect">Select Child:</label>
+      <select id="childSelect" onchange="selectChild()"></select>
+      <button class="button" style="background-color: red;" onclick="deleteChild()">Delete Selected Child</button>
+    </div>
+
+    <div id="moodSection" style="display:none;">
+      <h2 id="childTitle"></h2>
+
+      <div class="input-group">
+        <label for="dateSelect">Select Date:</label>
+        <input type="date" id="dateSelect">
+      </div>
+
+      <div class="input-group">
+        <label for="moodSelect">Select Mood:</label>
+        <select id="moodSelect">
+          <option value="">-- Select Mood --</option>
+          <option value="1">😞 Extremely Sad</option>
+          <option value="2">😢 Very Sad</option>
+          <option value="3">😟 Sad</option>
+          <option value="4">😕 Slightly Sad</option>
+          <option value="5">😐 Neutral</option>
+          <option value="6">🙂 Slightly Happy</option>
+          <option value="7">😊 Happy</option>
+          <option value="8">😃 Very Happy</option>
+          <option value="9">😄 Joyful</option>
+          <option value="10">🤩 Ecstatic</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="behaviourSelect">Select Behaviour:</label>
+        <select id="behaviourSelect">
+          <option value="">-- Select Behaviour --</option>
+          <option value="1">🚨 Extremely Negative</option>
+          <option value="2">😠 Very Negative</option>
+          <option value="3">🙁 Negative</option>
+          <option value="4">😑 Slightly Negative</option>
+          <option value="5">😐 Neutral</option>
+          <option value="6">😌 Slightly Positive</option>
+          <option value="7">😀 Positive</option>
+          <option value="8">😃 Very Positive</option>
+          <option value="9">😍 Excellent</option>
+          <option value="10">🏆 Exceptional</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="sleepSelect">Select Sleep Quality:</label>
+        <select id="sleepSelect">
+          <option value="">-- Select Sleep Quality --</option>
+          <option value="1">1 - Very Poor</option>
+          <option value="3">3 - Poor</option>
+          <option value="5">5 - Average</option>
+          <option value="7">7 - Good</option>
+          <option value="9">9 - Excellent</option>
+        </select>
+      </div>
+
+      <!-- 'log-mood-button' class for the click effect -->
+      <button class="log-mood-button" onclick="logMood()">Log Mood</button>
+    </div>
+
+    <div class="chart-container">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    let children = JSON.parse(localStorage.getItem("childrenData")) || {};
+    let selectedChild = localStorage.getItem("selectedChild") || "";
+    let trendChart;
+
+    function addChild() {
+      let nameInput = document.getElementById("childName").value.trim();
+      if (!nameInput) return alert("Please enter a valid child name.");
+      if (!children[nameInput]) {
+        // create child with empty moods array
+        children[nameInput] = { moods: [], behaviours: [], sleepQuality: [] };
+        localStorage.setItem("childrenData", JSON.stringify(children));
+        updateChildDropdown();
+        document.getElementById("childName").value = "";
+      } else {
+        alert("Child name already exists.");
+      }
+    }
+
+    function deleteChild() {
+      let childSelect = document.getElementById("childSelect");
+      let selectedChild = childSelect.value;
+      if (!selectedChild) return alert("Please select a child to delete.");
+
+      if (confirm(`Are you sure you want to delete ${selectedChild} and all associated data?`)) {
+        delete children[selectedChild];
+        localStorage.setItem("childrenData", JSON.stringify(children));
+        updateChildDropdown();
+        document.getElementById("moodSection").style.display = "none";
+        alert(`${selectedChild} has been deleted.`);
+      }
+    }
+
+    function updateChildDropdown() {
+      let dropdown = document.getElementById("childSelect");
+      dropdown.innerHTML = "<option value=''>-- Select Child --</option>";
+      Object.keys(children).forEach(name => {
+        let option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        dropdown.appendChild(option);
+      });
+      if (selectedChild && children[selectedChild]) {
+        dropdown.value = selectedChild;
+        selectChild();
+      }
+    }
+
+    function selectChild() {
+      selectedChild = document.getElementById("childSelect").value;
+      if (!selectedChild) {
+        document.getElementById("moodSection").style.display = "none";
+        return;
+      }
+      localStorage.setItem("selectedChild", selectedChild);
+      document.getElementById("moodSection").style.display = "block";
+      document.getElementById("childTitle").innerText = `Mood & Behaviour Log for ${selectedChild}`;
+      updateTrendChart();
+    }
+
+    function logMood() {
+      if (!selectedChild) return alert("Please select a child before logging mood.");
+      let date = document.getElementById("dateSelect").value;
+      let mood = parseInt(document.getElementById("moodSelect").value);
+      let behaviour = parseInt(document.getElementById("behaviourSelect").value);
+      let sleepQuality = parseInt(document.getElementById("sleepSelect").value);
+
+      if (!date || isNaN(mood) || isNaN(behaviour) || isNaN(sleepQuality)) return alert("Please fill in all fields.");
+
+      let entry = { date, mood, behaviour, sleepQuality };
+      children[selectedChild].moods.push(entry);
+      localStorage.setItem("childrenData", JSON.stringify(children));
+      updateTrendChart();
+    }
+
+    // (Trend chart logic or other relevant code can go here if needed)
+
+    window.onload = updateChildDropdown;
+  </script>
+</body>
+</html>
+
