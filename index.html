@@ -56,6 +56,21 @@
         .button:hover {
             background-color: #333;
         }
+        .admin-button {
+            display: inline-block;
+            background-color: grey;
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 8px;
+            margin: 10px;
+            border: none;
+            cursor: pointer;
+        }
+        .admin-button:hover {
+            background-color: #666;
+        }
         .emoji-container {
             font-size: 40px;
             margin-top: 20px;
@@ -75,6 +90,11 @@
                 padding: 12px;
                 font-size: 16px;
             }
+            .admin-button {
+                width: 70%;
+                padding: 8px 12px;
+                font-size: 12px;
+            }
             .emoji-container {
                 font-size: 30px;
             }
@@ -84,36 +104,6 @@
         document.addEventListener("DOMContentLoaded", function() {
             const companyName = localStorage.getItem("companyName") || "My Tribe Homes";
             document.getElementById("header-title").textContent = companyName;
-
-            // Optimized emoji placement
-            const emojis = ['😢', '😞', '😐', '🙂', '😁', '🤯', '😡', '😃', '🥺', '😆', '😭', '😅', '🙃', '🤔'];
-            const emojiContainer = document.querySelector(".background-emojis");
-            const positions = [];
-            const emojiSize = 80; // Reduced size for better spacing
-            const spacing = 1.8; // Slightly increased spacing
-            const maxAttempts = 50; // Limit attempts to avoid infinite loops
-            
-            for (let i = 0; i < 20; i++) { // Reduced number of emojis for performance
-                let emoji = document.createElement("span");
-                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-                
-                let top, left, attempt = 0;
-                let tooClose;
-                do {
-                    top = Math.random() * (window.innerHeight - emojiSize) + "px";
-                    left = Math.random() * (window.innerWidth - emojiSize) + "px";
-                    tooClose = positions.some(pos => {
-                        return Math.abs(parseFloat(pos.top) - parseFloat(top)) < emojiSize * spacing &&
-                               Math.abs(parseFloat(pos.left) - parseFloat(left)) < emojiSize * spacing;
-                    });
-                    attempt++;
-                } while (tooClose && attempt < maxAttempts);
-                
-                positions.push({ top, left });
-                emoji.style.top = top;
-                emoji.style.left = left;
-                emojiContainer.appendChild(emoji);
-            }
         });
     </script>
 </head>
@@ -131,11 +121,16 @@
         <div class="emoji-container">
             😢 😞 😐 🙂 😁
         </div>
-        <a href="Landing Page.html" class="button">Track Mood and Behaviour</a>
+        <a href="Landing Page.html" class="button">Track Mood and behaviour</a>
         <a href="Mood V's Behaviour Analysis.html" class="button">Mood V's Behaviour Analysis</a>
         <a href="Best Days.html" class="button">Best Days</a>
-        <a href="Admin.html" class="button">Admin</a>
+        <a href="Admin.html" class="admin-button">Admin</a>
     </div>
+    <footer style="margin-top: 20px; padding: 10px; font-size: 14px; color: #333;">
+        <strong>NB:</strong> For first time users, please select the "ADMIN" button first and fill in the detail.
+    </footer>
 </body>
 </html>
+
+
 
