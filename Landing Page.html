@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +11,21 @@
             padding: 0;
             background-color: #fff; /* White background */
             text-align: center;
+            position: relative;
+        }
+        .background-emojis {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+        .background-emojis span {
+            position: absolute;
+            font-size: 80px;
         }
         .header {
             background-color: #000; /* Black header */
@@ -45,15 +60,65 @@
             font-size: 40px;
             margin-top: 20px;
         }
+        /* Responsive Styles */
+        @media (max-width: 600px) {
+            .header {
+                font-size: 20px;
+                padding: 15px;
+                border: 10px solid #fff;
+            }
+            .content {
+                padding: 10px;
+            }
+            .button {
+                width: 90%;
+                padding: 12px;
+                font-size: 16px;
+            }
+            .emoji-container {
+                font-size: 30px;
+            }
+        }
     </style>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const companyName = localStorage.getItem("companyName") || "My Tribe Homes";
             document.getElementById("header-title").textContent = companyName;
+
+            // Optimized emoji placement
+            const emojis = ['😢', '😞', '😐', '🙂', '😁', '🤯', '😡', '😃', '🥺', '😆', '😭', '😅', '🙃', '🤔'];
+            const emojiContainer = document.querySelector(".background-emojis");
+            const positions = [];
+            const emojiSize = 80; // Reduced size for better spacing
+            const spacing = 1.8; // Slightly increased spacing
+            const maxAttempts = 50; // Limit attempts to avoid infinite loops
+            
+            for (let i = 0; i < 20; i++) { // Reduced number of emojis for performance
+                let emoji = document.createElement("span");
+                emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                
+                let top, left, attempt = 0;
+                let tooClose;
+                do {
+                    top = Math.random() * (window.innerHeight - emojiSize) + "px";
+                    left = Math.random() * (window.innerWidth - emojiSize) + "px";
+                    tooClose = positions.some(pos => {
+                        return Math.abs(parseFloat(pos.top) - parseFloat(top)) < emojiSize * spacing &&
+                               Math.abs(parseFloat(pos.left) - parseFloat(left)) < emojiSize * spacing;
+                    });
+                    attempt++;
+                } while (tooClose && attempt < maxAttempts);
+                
+                positions.push({ top, left });
+                emoji.style.top = top;
+                emoji.style.left = left;
+                emojiContainer.appendChild(emoji);
+            }
         });
     </script>
 </head>
 <body>
+    <div class="background-emojis"></div>
     <div class="header" id="header-title">
         My Tribe Homes
     </div>
@@ -73,3 +138,4 @@
     </div>
 </body>
 </html>
+

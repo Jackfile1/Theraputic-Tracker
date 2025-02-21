@@ -31,21 +31,21 @@
     .button-container {
       display: flex;
       justify-content: center;
-      gap: 15px;
-      margin: 20px 0;
+      gap: 10px;
+      margin: 15px 0;
+      flex-wrap: wrap;
     }
 
     .menu-button {
       display: inline-block;
-      padding: 10px 15px;
+      padding: 12px 22px;
       background-color: black;
       color: white;
       text-decoration: none;
       font-size: 14px;
       border-radius: 12px;
-      width: 150px;
+      width: 200px;
       text-align: center;
-      font-weight: bold;
     }
 
     .menu-button:hover {
@@ -73,7 +73,28 @@
       width: 300px;
       margin-bottom: 15px;
     }
-  </style>
+  @media (max-width: 600px) {
+      body {
+        margin: 10px;
+      }
+      .header {
+        font-size: 20px;
+        padding: 15px;
+      }
+      .menu-button {
+        width: 120px;
+        font-size: 12px;
+        padding: 8px;
+      }
+      select {
+        width: 250px;
+        font-size: 16px;
+      }
+      .chart-container {
+        width: 100%;
+      }
+    }
+</style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
@@ -244,5 +265,4 @@
   </script>
 </body>
 </html>
-
 
