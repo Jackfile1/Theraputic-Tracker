@@ -6,7 +6,6 @@
   <title>Best Days</title>
 
   <style>
-    /* Base Styles */
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
@@ -34,18 +33,17 @@
       justify-content: center;
       gap: 15px;
       margin: 20px 0;
-      flex-wrap: wrap; /* Allows buttons to wrap on smaller screens */
     }
 
     .menu-button {
       display: inline-block;
-      padding: 15px 20px;
+      padding: 10px 15px;
       background-color: black;
       color: white;
       text-decoration: none;
-      font-size: 16px;
-      border-radius: 15px; /* Rounded square buttons */
-      width: 180px;
+      font-size: 14px;
+      border-radius: 12px;
+      width: 150px;
       text-align: center;
       font-weight: bold;
     }
@@ -66,6 +64,7 @@
       height: auto !important;
     }
 
+    /* 🔹 Larger Select Dropdown */
     select {
       padding: 15px;
       font-size: 18px;
@@ -73,31 +72,6 @@
       border-radius: 5px;
       width: 300px;
       margin-bottom: 15px;
-    }
-
-    /* ---------------------------------------------
-       Make it more responsive on mobile devices
-    --------------------------------------------- */
-    @media (max-width: 600px) {
-      body {
-        margin: 10px;
-      }
-
-      .header {
-        font-size: 20px;
-        padding: 15px;
-      }
-
-      .menu-button {
-        width: 140px; /* Slightly narrower buttons */
-        font-size: 14px; /* Adjust font for smaller screens */
-        padding: 10px;
-      }
-
-      select {
-        width: 250px; /* Slightly narrower */
-        font-size: 16px;
-      }
     }
   </style>
 
@@ -111,6 +85,7 @@
   <div class="container">
     <h1>Day of Week Averages (Mood, Behaviour & Sleep)</h1>
 
+    <!-- 🔹 Navigation Buttons moved under title -->
     <div class="button-container">
       <a href="Landing Page.html" class="menu-button">Home</a>
       <a href="Index.html" class="menu-button">Track Mood and Behaviour</a>
@@ -131,11 +106,11 @@
     document.addEventListener("DOMContentLoaded", function () {
       const savedCompanyName = localStorage.getItem("companyName");
       if (savedCompanyName) {
-        document.getElementById("companyHeader").textContent = savedCompanyName;
+        document.getElementById("companyHeader").textContent = savedCompanyName ;
       }
       window.addEventListener("companyNameUpdated", function () {
         const updatedCompanyName = localStorage.getItem("companyName");
-        document.getElementById("companyHeader").textContent = updatedCompanyName;
+        document.getElementById("companyHeader").textContent = updatedCompanyName ;
       });
       populateChildDropdown();
     });
@@ -195,11 +170,11 @@
         }
       });
 
-      const moodAverages = moodCounts.map((count, i) => (count ? moodSums[i] / count : 0));
-      const behaviourAverages = behaviourCounts.map((count, i) => (count ? behaviourSums[i] / count : 0));
-      const sleepAverages = sleepCounts.map((count, i) => (count ? sleepSums[i] / count : 0));
+      const moodAverages = moodCounts.map((count, i) => count ? moodSums[i] / count : 0);
+      const behaviourAverages = behaviourCounts.map((count, i) => count ? behaviourSums[i] / count : 0);
+      const sleepAverages = sleepCounts.map((count, i) => count ? sleepSums[i] / count : 0);
 
-      // If there's already a chart, destroy it before creating a new one
+      // If there's already a chart, destroy it before re-creating
       if (dayOfWeekChart) {
         dayOfWeekChart.destroy();
       }
@@ -251,9 +226,7 @@
               max: 10,
               title: { display: true, text: "Score (1-10)" }
             },
-            x: {
-              title: { display: true, text: "Day of the Week" }
-            }
+            x: { title: { display: true, text: "Day of the Week" } }
           }
         },
         plugins: [ChartDataLabels]
@@ -271,4 +244,5 @@
   </script>
 </body>
 </html>
+
 
