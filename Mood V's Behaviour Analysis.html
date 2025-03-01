@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -166,7 +167,7 @@
 
           if (selectedChild && childrenData[selectedChild]?.moods?.length) {
               let months = [...new Set(childrenData[selectedChild].moods.map(entry => entry.date.slice(0, 7)))];
-              months.forEach(month => {
+              months.sort().forEach(month => {
                   let option = document.createElement("option");
                   option.value = month;
                   option.textContent = `Month ${month}`;
@@ -188,6 +189,7 @@
               return;
           }
           let filteredEntries = childrenData[selectedChild].moods.filter(entry => !selectedMonth || entry.date.slice(0, 7) === selectedMonth);
+          filteredEntries.sort((a, b) => new Date(a.date) - new Date(b.date));
           document.getElementById("childNameDisplay").textContent = `Mood, Behaviour & Sleep Trend for ${selectedChild}`;
           const ctx = document.getElementById("trendChart").getContext("2d");
           if (trendChart) trendChart.destroy();
@@ -196,5 +198,3 @@
   </script>
 </body>
 </html>
-
-
