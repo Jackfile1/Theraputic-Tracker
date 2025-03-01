@@ -134,15 +134,19 @@
 
   <script>
       document.addEventListener("DOMContentLoaded", function () {
+          updateCompanyHeader();
           populateChildDropdown();
-          updateTrendChart();
       });
 
-      let childrenData = JSON.parse(localStorage.getItem("childrenData")) || {};
-      let selectedChild = localStorage.getItem("selectedChild") || "";
       let trendChart;
+      
+      function updateCompanyHeader() {
+          const savedCompanyName = localStorage.getItem("companyName") || "My Tribe Homes";
+          document.getElementById("companyHeader").textContent = savedCompanyName;
+      }
 
       function populateChildDropdown() {
+          let childrenData = JSON.parse(localStorage.getItem("childrenData")) || {};
           let childSelect = document.getElementById("childSelect");
           childSelect.innerHTML = '<option value="">Select a Child</option>';
           
@@ -152,18 +156,13 @@
               option.textContent = child;
               childSelect.appendChild(option);
           });
-
-          if (selectedChild && childrenData[selectedChild]) {
-              childSelect.value = selectedChild;
-              updateMonthDropdown();
-              updateTrendChart();
-          }
       }
 
       function updateMonthDropdown() {
+          let selectedChild = document.getElementById("childSelect").value;
           let monthSelect = document.getElementById("monthSelect");
           monthSelect.innerHTML = '<option value="">Select a Month</option>';
-          selectedChild = document.getElementById("childSelect").value;
+          let childrenData = JSON.parse(localStorage.getItem("childrenData")) || {};
 
           if (selectedChild && childrenData[selectedChild]?.moods?.length) {
               let months = [...new Set(childrenData[selectedChild].moods.map(entry => entry.date.slice(0, 7)))];
@@ -177,10 +176,9 @@
       }
 
       function updateTrendChart() {
-          selectedChild = document.getElementById("childSelect").value;
+          let selectedChild = document.getElementById("childSelect").value;
           let selectedMonth = document.getElementById("monthSelect").value;
-          localStorage.setItem("selectedChild", selectedChild);
-
+          let childrenData = JSON.parse(localStorage.getItem("childrenData")) || {};
           if (!selectedChild || !childrenData[selectedChild]?.moods?.length) {
               document.getElementById("childNameDisplay").textContent = "No data available.";
               if (trendChart) {
@@ -189,67 +187,12 @@
               }
               return;
           }
-
-          let filteredEntries = childrenData[selectedChild].moods;
-          if (selectedMonth) {
-              filteredEntries = filteredEntries.filter(entry => entry.date.slice(0, 7) === selectedMonth);
-          }
-
+          let filteredEntries = childrenData[selectedChild].moods.filter(entry => !selectedMonth || entry.date.slice(0, 7) === selectedMonth);
           document.getElementById("childNameDisplay").textContent = `Mood, Behaviour & Sleep Trend for ${selectedChild}`;
-
           const ctx = document.getElementById("trendChart").getContext("2d");
-          if (trendChart) {
-              trendChart.destroy();
-          }
-
-          trendChart = new Chart(ctx, {
-              type: "line",
-              data: {
-                  labels: filteredEntries.map(entry => entry.date),
-                  datasets: [
-                      {
-                          label: "Mood",
-                          data: filteredEntries.map(entry => entry.mood),
-                          borderColor: "blue",
-                          fill: false,
-                          tension: 0.3
-                      },
-                      {
-                          label: "Behaviour",
-                          data: filteredEntries.map(entry => entry.behaviour),
-                          borderColor: "red",
-                          fill: false,
-                          tension: 0.3
-                      },
-                      {
-                          label: "Sleep Quality",
-                          data: filteredEntries.map(entry => entry.sleepQuality),
-                          borderColor: "green",
-                          fill: false,
-                          tension: 0.3
-                      }
-                  ]
-              },
-              options: {
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  scales: {
-                      x: {
-                          title: { display: true, text: "Date" },
-                          ticks: { autoSkip: true, maxTicksLimit: 10 }
-                      },
-                      y: {
-                          min: 1, max: 10,
-                          title: { display: true, text: "Scale (1-10)" }
-                      }
-                  }
-              }
-          });
+          if (trendChart) trendChart.destroy();
+          trendChart = new Chart(ctx, { type: "line", data: { labels: filteredEntries.map(entry => entry.date), datasets: [ { label: "Mood", data: filteredEntries.map(entry => entry.mood), borderColor: "blue", fill: false }, { label: "Behaviour", data: filteredEntries.map(entry => entry.behaviour), borderColor: "red", fill: false }, { label: "Sleep Quality", data: filteredEntries.map(entry => entry.sleepQuality), borderColor: "green", fill: false } ] }});
       }
   </script>
 </body>
 </html>
-
-
-
-
